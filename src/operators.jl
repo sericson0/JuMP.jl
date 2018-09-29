@@ -288,30 +288,17 @@ end
 # Base Julia's generic fallback vecdot requires that dot be defined
 # for scalars, so instead of defining them one-by-one, we will
 # fallback to the multiplication operator
-LinearAlgebra.dot(lhs::JuMPTypes, rhs::JuMPTypes) = lhs*rhs
-LinearAlgebra.dot(lhs::JuMPTypes, rhs::Number)    = lhs*rhs
-LinearAlgebra.dot(lhs::Number,    rhs::JuMPTypes) = lhs*rhs
+Compat.LinearAlgebra.dot(lhs::JuMPTypes, rhs::JuMPTypes) = lhs*rhs
+Compat.LinearAlgebra.dot(lhs::JuMPTypes, rhs::Number)    = lhs*rhs
+Compat.LinearAlgebra.dot(lhs::Number,    rhs::JuMPTypes) = lhs*rhs
 
-LinearAlgebra.dot(lhs::AbstractArray{T,N}, rhs::JuMPArray{S,N}) where {T,S,N}    = vecdot(lhs,rhs)
-LinearAlgebra.dot(lhs::JuMPArray{T,N},rhs::AbstractArray{S,N}) where {T,S,N}     = vecdot(lhs,rhs)
-LinearAlgebra.dot(lhs::JuMPArray{T,N},rhs::JuMPArray{S,N}) where {T,S,N} = vecdot(lhs,rhs)
-LinearAlgebra.dot(lhs::AbstractArray{T,N}, rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S,N} = vecdot(lhs,rhs)
-LinearAlgebra.dot(lhs::AbstractArray{T,N}, rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S<:JuMPTypes,N} = vecdot(lhs,rhs)
-LinearAlgebra.dot(lhs::AbstractArray{T,N}, rhs::AbstractArray{S,N}) where {T,S<:JuMPTypes,N} = vecdot(lhs,rhs)
+Compat.dot(lhs::AbstractVector{T},rhs::AbstractVector{S}) where {T<:JuMPTypes,S<:JuMPTypes} = _dot(lhs,rhs)
+Compat.dot(lhs::AbstractVector{T},rhs::AbstractVector{S}) where {T<:JuMPTypes,S} = _dot(lhs,rhs)
+Compat.dot(lhs::AbstractVector{T},rhs::AbstractVector{S}) where {T,S<:JuMPTypes} = _dot(lhs,rhs)
 
-LinearAlgebra.dot(lhs::AbstractVector{T},rhs::AbstractVector{S}) where {T<:JuMPTypes,S<:JuMPTypes} = _dot(lhs,rhs)
-LinearAlgebra.dot(lhs::AbstractVector{T},rhs::AbstractVector{S}) where {T<:JuMPTypes,S} = _dot(lhs,rhs)
-LinearAlgebra.dot(lhs::AbstractVector{T},rhs::AbstractVector{S}) where {T,S<:JuMPTypes} = _dot(lhs,rhs)
-
-if VERSION < v"0.7-"
-    LinearAlgebra.vecdot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S,N} = _dot(lhs,rhs)
-    LinearAlgebra.vecdot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S<:JuMPTypes,N} = _dot(lhs,rhs)
-    LinearAlgebra.vecdot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T,S<:JuMPTypes,N} = _dot(lhs,rhs)
-else
-    vecdot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S,N} = _dot(lhs,rhs)
-    vecdot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S<:JuMPTypes,N} = _dot(lhs,rhs)
-    vecdot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T,S<:JuMPTypes,N} = _dot(lhs,rhs)
-end
+Compat.dot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S<:JuMPTypes,N} = _dot(lhs,rhs)
+Compat.dot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T<:JuMPTypes,S,N} = _dot(lhs,rhs)
+Compat.dot(lhs::AbstractArray{T,N},rhs::AbstractArray{S,N}) where {T,S<:JuMPTypes,N} = _dot(lhs,rhs)
 
 function _dot(lhs::AbstractArray{T}, rhs::AbstractArray{S}) where {T,S}
     size(lhs) == size(rhs) || error("Incompatible dimensions")
@@ -340,7 +327,7 @@ Compat.adjoint(x::JuMPArray) = _throw_transpose_error()
 
 # Can remove the following code once == overloading is removed
 
-function LinearAlgebra.issymmetric(x::Matrix{T}) where T<:JuMPTypes
+function Compat.LinearAlgebra.issymmetric(x::Matrix{T}) where T<:JuMPTypes
     (n = size(x,1)) == size(x,2) || return false
     for i in 1:n, j in (i+1):n
         isequal(x[i,j], x[j,i]) || return false
@@ -349,7 +336,7 @@ function LinearAlgebra.issymmetric(x::Matrix{T}) where T<:JuMPTypes
 end
 
 # Special-case because the the base version wants to do fill!(::Array{Variable}, zero(AffExpr))
-function LinearAlgebra.diagm(x::AbstractVector{Variable})
+function Compat.LinearAlgebra.diagm(x::AbstractVector{Variable})
     @assert one_indexed(x) # Base.diagm doesn't work for non-one-indexed arrays in general.
     diagm(copyto!(similar(x, AffExpr), x))
 end
