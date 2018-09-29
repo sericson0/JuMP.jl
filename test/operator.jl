@@ -502,8 +502,8 @@ Base.transpose(t::MySumType) = MySumType(t.a)
         for i in 1:2, j in 1:2
             setvalue(y[i,j], 1)
         end
-        @test isapprox(dot(c, getvalue(x)), 6.0)
-        @test isapprox(dot(A, getvalue(y)), 10.0)
+        @test isapprox(dot(convert(Array{Float64}, c), getvalue(x)), 6.0)
+        @test isapprox(dot(convert(Array{Float64}, A), getvalue(y)), 10.0)
 
         # https://github.com/JuliaOpt/JuMP.jl/issues/656
         issue656 = Model()
