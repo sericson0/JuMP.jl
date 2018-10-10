@@ -64,6 +64,10 @@ Breaking changes:
   forms and second-order cone constraints. Support for these
   constraint classes depends on the solver.
 
+- We rely on broadcasting syntax to apply accessors to collections of
+  variables, e.g., `result_value.(x)` instead of `getvalue(x)` if `x`
+  is an `Array` or `JuMPArray`.
+
 New features:
 
 - Support for deleting constraints and variables.
