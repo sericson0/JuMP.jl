@@ -1,5 +1,4 @@
-Nonlinear Modeling
-==================
+# Nonlinear Modeling
 
 ```@meta
 CurrentModule = JuMP
